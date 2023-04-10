@@ -107,7 +107,7 @@ def count_chars(full_txt:str):
 		if ascii_i>=65 and ascii_i<=90 :
 			char_count[char.upper()] = char_count.get(char.upper(),0)+1
 	sorted_char_count = sorted(char_count,key=lambda key : char_count[key],reverse=True)
-	return(sorted_char_count[0],char_count[sorted_char_count[0]])
+	return(sorted_char_count[0].lower(),char_count[sorted_char_count[0]])
 
 def contains_abc(conversation:list)->int:
 	count = 0
