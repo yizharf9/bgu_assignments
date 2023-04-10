@@ -42,6 +42,8 @@ def show_conversation(conversation):
 def send_msg(username:str, msg_content:str, msg_last_id:int, conversation_size:int, max_conversation_size:int, conversation:list):
 	#TODO
 	if enough_space(msg_content,conversation_size,max_conversation_size):
+		if msg_content.endswith(".txt"):
+			file_fixing(msg_content)
 		conversation_size += len(msg_content)
 		msg_last_id += 1
 		new_msg = [msg_last_id,username,msg_content,current_time_to_str()]
@@ -102,16 +104,20 @@ def file_fixing(filename:str):
                     back_word += word[-i]
                 newline+= back_word +" "
             output += newline.lstrip() +'\n'
-    with open(filename,'w') as f :
+    with open('output_'+filename[2:],'w') as f :
         f.write(output) 
+
 
 def count_chars(full_txt:str):
 	char_count:dict[str,int] = {}
+	def get_value(k:str)->int: return char_count[k]
+
 	for char in full_txt:
 		ascii_i = ord(char.upper())
 		if ascii_i>=65 and ascii_i<=90 :
 			char_count[char.upper()] = char_count.get(char.upper(),0)+1
-	sorted_char_count = sorted(char_count,key=lambda key : char_count[key],reverse=True)
+	# sorted_char_count = sorted(char_count,key=lambda key : char_count[key],reverse=True)
+	sorted_char_count = sorted(char_count,key= get_value,reverse=True)
 	return(sorted_char_count[0].lower(),char_count[sorted_char_count[0]])
 
 def contains_abc(conversation:list)->int:
