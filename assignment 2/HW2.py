@@ -46,9 +46,6 @@ def send_msg(username:str, msg_content:str, msg_last_id:int, conversation_size:i
 		msg_last_id += 1
 		new_msg = [msg_last_id,username,msg_content,current_time_to_str()]
 		conversation.append(new_msg)
-		# print(conversation_size)
-	# else:
-		# print("There is not enough space in the storage!")
 	return msg_last_id,conversation_size
 
 def find_msg_index(msg_id, conversation):
@@ -93,12 +90,20 @@ def print_starred_messages(conversation):
 		return output[:-1]
 
 def file_fixing(filename:str):
-	#TODO
-	if filename.endswith('.txt') :
-		fh = open(filename)
-		output = ''
-		for char in fh.read():
-			output = char + output
+    output = ''
+    with open(filename) as f :
+        content = f.readlines()
+        for line in content:
+            newline = ''
+            word_lst = line.split()
+            for word in word_lst :
+                back_word = ''
+                for i in range(1,len(word)+1):
+                    back_word += word[-i]
+                newline+= back_word +" "
+            output += newline.lstrip() +'\n'
+    with open(filename,'w') as f :
+        f.write(output) 
 
 def count_chars(full_txt:str):
 	char_count:dict[str,int] = {}
