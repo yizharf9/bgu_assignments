@@ -61,9 +61,6 @@ def n_set(n:int)->str:
         return ''
     return  n_set(n-1) + str(n) 
 
-
-
-
 def k_size_subsets(n:int, k:int) -> str:
     # base case - n==k
     if n == k : 
@@ -72,7 +69,6 @@ def k_size_subsets(n:int, k:int) -> str:
         n-=1
         
     pass
-    
 
 # region - testing
 # answer = n_set(5)
@@ -81,37 +77,67 @@ def k_size_subsets(n:int, k:int) -> str:
 # print(answer)
 # endregion
 
+#? auxiliary function
+def recurse_depth(d:dict)->int:
+    max = 0
+    if type(d) != dict :
+        max -= 1
+    elif type(d) == dict:
+        for key in  d.keys():
+            #! recursive call
+            res =  recurse_depth(d.get(key,0)) + 1
+            if res > max : 
+                max = res
+    return max    
 
 def dict_depth(d:dict)->int:
-
-    if type(d) != dict:
-        return -1
-    elif type(d) == dict:
-        max = 0
-        for key in  d.keys():
-            res =  dict_depth(d.get(key,0)) + 1
-            if res > max : max = res
-        return max
-        
+    if type(d) != dict :
+        return TypeError('not a dictionary')
+    return recurse_depth(d)
 
 # region - testing
-
-# depth = 0
+#? depth = 0
 test0 = {}
-# depth = 1
+#? depth = 1
 test1 = {1: {1: "a", 2: "b"}, 2: "b"}
-# depth = 2
+#? depth = 2
 test2 = {1: {1: "a", 2:"b"}, 2: {1: {1: "a", 2: "b"}, 2: "b"}}
-# depth = 2
+#? depth = 2
 test3 = {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}
-arr = [test0,test1,test2,test3]
+#? depth = 7
+test4 = {1: {1: "a",2: {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}},4: {1:{1: {1: {1: "a",2: {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"},2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}
+#! type error
+test5 = 1
+arr = [test0,test1,test2,test3,test4,test5]
 # for test in arr:
-#     print(dict_depth(test))
+#   print(dict_depth(test))
 # endregion
 
-def nested_get(d, key):
-    # Delete the pass command and insert you code below
-    pass
+def nested_get(d:dict, key:int)->list[str]:
+    res = []
+    # base case - a dict with the wanted key
+    if type(d.get(key,0)) == str : 
+        res.append(d.get(key))
+    for sub in d.keys():
+        if type(d.get(sub,0)) == dict :
+            res += nested_get(d[sub],key)
+    return res
+
+# region
+#? expected : ['b']
+test1 = nested_get({1: "a", 2: "b"}, 2)
+#? expected : []
+test2 = nested_get({1: {1: "a", 2: "b"}, 2: "b"}, 3)
+#? expected : ['a','c']
+test3 = nested_get({1: {1: "a", 2: "b"}, 2: {1: {1: "c", 2: "b"}, 2: "b"}}, 1)
+#? expected : ['a','c']
+test4 = nested_get({1: {1: "a", 2: "b"}, 2: {1: {1: "c", 2: {1: {1: "x", 2: {1: "45", 2: {1: {1: "5", 2: "b"}, 2: {1: {1: "yizhar", 2: "b"}, 2: "b"}}}}, 2: {1: {1: "z", 2: "b"}, 2: "b"}}}, 2: "b"}}, 1)
+
+test_arr = [test1,test2,test3,test4]
+for test in test_arr:
+    print(test)
+# endregion
+
 
 
 def distance(row1, col1, row2, col2):
