@@ -26,7 +26,6 @@ def linear_sum(x:list, result:int) -> bool:
 # print(answer)
 # endregion
 
-
 def ordered_subset(str1:str, str2:str) -> bool:
     # base case - comparing 2 chars
     # ! second condition - 2 consequtive chars of str2 in str1 returns false 
@@ -64,18 +63,18 @@ def n_set(n:int)->str:
 def k_size_subsets(n:int, k:int) -> str:
     # base case - n==k
     if n == k : 
-        return [n_set(n)]
+        return []
     if n > k :
         n-=1
         
     pass
 
-# region - testing
+# #? region - testing
 # answer = n_set(5)
 # answer = k_size_subsets(5,3)
-# [‘123’, ‘124’, ‘125’, ‘134’, ‘135’, ‘145’, ‘234’, ‘235’, ‘245’, ‘345’]
+# # [‘123’, ‘124’, ‘125’, ‘134’, ‘135’, ‘145’, ‘234’, ‘235’, ‘245’, ‘345’]
 # print(answer)
-# endregion
+# # endregion
 
 #? auxiliary function
 def recurse_depth(d:dict)->int:
@@ -95,23 +94,23 @@ def dict_depth(d:dict)->int:
         return TypeError('not a dictionary')
     return recurse_depth(d)
 
-# region - testing
-#? depth = 0
-test0 = {}
-#? depth = 1
-test1 = {1: {1: "a", 2: "b"}, 2: "b"}
-#? depth = 2
-test2 = {1: {1: "a", 2:"b"}, 2: {1: {1: "a", 2: "b"}, 2: "b"}}
-#? depth = 2
-test3 = {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}
-#? depth = 7
-test4 = {1: {1: "a",2: {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}},4: {1:{1: {1: {1: "a",2: {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"},2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}
-#! type error
-test5 = 1
-arr = [test0,test1,test2,test3,test4,test5]
-# for test in arr:
-#   print(dict_depth(test))
-# endregion
+# #? region - testing
+# #? depth = 0
+# test0 = {}
+# #? depth = 1
+# test1 = {1: {1: "a", 2: "b"}, 2: "b"}
+# #? depth = 2
+# test2 = {1: {1: "a", 2:"b"}, 2: {1: {1: "a", 2: "b"}, 2: "b"}}
+# #? depth = 2
+# test3 = {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}
+# #? depth = 7
+# test4 = {1: {1: "a",2: {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}},4: {1:{1: {1: {1: "a",2: {1: {1: "a",2: "b"},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}},4: {1:{1: "a",2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"},2: "b"},2: "b"},3: {1: "a",2: "b"},2: "b"}
+# #! type error
+# test5 = 1
+# arr = [test0,test1,test2,test3,test4,test5]
+# # for test in arr:
+# #   print(dict_depth(test))
+# # endregion
 
 def nested_get(d:dict, key:int)->list[str]:
     res = []
@@ -123,32 +122,33 @@ def nested_get(d:dict, key:int)->list[str]:
             res += nested_get(d[sub],key)
     return res
 
-# region
-#? expected : ['b']
-test1 = nested_get({1: "a", 2: "b"}, 2)
-#? expected : []
-test2 = nested_get({1: {1: "a", 2: "b"}, 2: "b"}, 3)
-#? expected : ['a','c']
-test3 = nested_get({1: {1: "a", 2: "b"}, 2: {1: {1: "c", 2: "b"}, 2: "b"}}, 1)
-#? expected : ['a','c']
-test4 = nested_get({1: {1: "a", 2: "b"}, 2: {1: {1: "c", 2: {1: {1: "x", 2: {1: "45", 2: {1: {1: "5", 2: "b"}, 2: {1: {1: "yizhar", 2: "b"}, 2: "b"}}}}, 2: {1: {1: "z", 2: "b"}, 2: "b"}}}, 2: "b"}}, 1)
+# #? region
+# #? expected : ['b']
+# test1 = nested_get({1: "a", 2: "b"}, 2)
+# #? expected : []
+# test2 = nested_get({1: {1: "a", 2: "b"}, 2: "b"}, 3)
+# #? expected : ['a','c']
+# test3 = nested_get({1: {1: "a", 2: "b"}, 2: {1: {1: "c", 2: "b"}, 2: "b"}}, 1)
+# #? expected : ['a','c']
+# test4 = nested_get({1: {1: "a", 2: "b"}, 2: {1: {1: "c", 2: {1: {1: "x", 2: {1: "45", 2: {1: {1: "5", 2: "b"}, 2: {1: {1: "yizhar", 2: "b"}, 2: "b"}}}}, 2: {1: {1: "z", 2: "b"}, 2: "b"}}}, 2: "b"}}, 1)
 
-test_arr = [test1,test2,test3,test4]
-for test in test_arr:
-    print(test)
-# endregion
+# test_arr = [test1,test2,test3,test4]
+# for test in test_arr:
+#     print(test)
+# # endregion
 
 
 
 def distance(row1, col1, row2, col2):
-    # Delete the pass command and insert you code below
-    pass
-
+    return abs(row1-row2) + abs(col1-col2)
 
 def add_tower(board, d, row, col):
-    # Delete the pass command and insert you code below
-    pass
-
+    res = True
+    for _row,_col in enumerate(board[:row]):
+        print("distance :" + str(distance(row,_row,col,_col)))
+        if distance(row,_row,col,_col) < d :
+            res = False
+    return res 
 
 def n_towers(n, d):
     # Delete the pass command and insert you code below
