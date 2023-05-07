@@ -55,22 +55,33 @@ def ordered_subset(str1:str, str2:str) -> bool:
 # print(answer)
 # endregion
 
+
 def n_set(n:int)->str:
     if n == 0 :
         return ''
-    return  n_set(n-1) + str(n) 
+    else : 
+        return n_set(n-1) + str(n)
+
+def rec_sub(k:int,subsets:list[str],subset:str,i:int=0)->None:
+    # base case - subset len(k)...
+    if len(subset) == k or i == len(subset) :
+        subsets.append(subset)
+    # rec step -
+    elif i > len(subset):
+        pass
+        # rec_sub(k,subsets,subset[:-1],i)
+    else:
+        rec_sub(k,subsets,subset[:i]+subset[i+1:],i)
+        rec_sub(k,subsets,subset,i+1)
 
 def k_size_subsets(n:int, k:int) -> str:
-    # base case - n==k
-    if n == k : 
-        return []
-    if n > k :
-        n-=1
-        
-    pass
+    a = []
+    rec_sub(k,a,n_set(n))
+    return a
+
 
 # #? region - testing
-# answer = n_set(5)
+# answer = n_set(5) 
 # answer = k_size_subsets(5,3)
 # # [‘123’, ‘124’, ‘125’, ‘134’, ‘135’, ‘145’, ‘234’, ‘235’, ‘245’, ‘345’]
 # print(answer)
