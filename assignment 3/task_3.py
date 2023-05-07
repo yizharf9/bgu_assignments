@@ -1,3 +1,12 @@
+def fact(n):
+    mult = 1
+    for i in range(n):
+        mult*=i+1
+    return mult
+
+def nCk(n:int,k:int)->int:
+    return fact(n)/(fact(k)*fact(n-k))
+
 def linear_sum(x:list, result:int) -> bool:    
     # base case - the list is size 0,
     # setting the result to 0 means that we found a linear sum
@@ -55,7 +64,6 @@ def ordered_subset(str1:str, str2:str) -> bool:
 # print(answer)
 # endregion
 
-
 def n_set(n:int)->str:
     if n == 0 :
         return ''
@@ -64,12 +72,11 @@ def n_set(n:int)->str:
 
 def rec_sub(k:int,subsets:list[str],subset:str,i:int=0)->None:
     # base case - subset len(k)...
-    if len(subset) == k or i == len(subset) :
+    if len(subset) == k :
         subsets.append(subset)
-    # rec step -
-    elif i > len(subset):
+    # rec step - 
+    elif i > k:
         pass
-        # rec_sub(k,subsets,subset[:-1],i)
     else:
         rec_sub(k,subsets,subset[:i]+subset[i+1:],i)
         rec_sub(k,subsets,subset,i+1)
@@ -79,15 +86,16 @@ def k_size_subsets(n:int, k:int) -> str:
     rec_sub(k,a,n_set(n))
     return a
 
-
 # #? region - testing
 # answer = n_set(5) 
 # answer = k_size_subsets(5,3)
 # # [‘123’, ‘124’, ‘125’, ‘134’, ‘135’, ‘145’, ‘234’, ‘235’, ‘245’, ‘345’]
-# print(answer)
+n,k = 8,4
+answer = k_size_subsets(n,k)
+print(answer[:10])
+print(len(answer)-nCk(n,k))
 # # endregion
 
-#? auxiliary function
 def recurse_depth(d:dict)->int:
     max = 0
     if type(d) != dict :
@@ -147,7 +155,6 @@ def nested_get(d:dict, key:int)->list[str]:
 # for test in test_arr:
 #     print(test)
 # # endregion
-
 
 
 def distance(row1, col1, row2, col2):
