@@ -47,7 +47,7 @@ def n_set(n:int)->str:
     else : 
         return n_set(n-1) + str(n)
 
-def rec_sub(k:int,subsets:list[str],subset:str,i:int=0)->None:
+def rec_sub(k,subsets,subset,i=0)->None:
     # base case - subset len(k)...
     if len(subset) == k :
         subsets.append(subset)
@@ -58,12 +58,12 @@ def rec_sub(k:int,subsets:list[str],subset:str,i:int=0)->None:
         rec_sub(k,subsets,subset[:i]+subset[i+1:],i)
         rec_sub(k,subsets,subset,i+1)
 
-def k_size_subsets(n:int, k:int) -> list[str]:
+def k_size_subsets(n, k):
     a = []
     rec_sub(k,a,n_set(n))
     return a
 # 3a
-def recurse_depth(d:dict)->int:
+def recurse_depth(d):
     max = 0
     if type(d) != dict :
         max -= 1
@@ -75,12 +75,12 @@ def recurse_depth(d:dict)->int:
                 max = res
     return max    
 
-def dict_depth(d:dict):
+def dict_depth(d):
     if type(d) != dict :
-        return TypeError('not a dictionary')
+        raise TypeError("expected a dictionary!")
     return recurse_depth(d)
 # 3b
-def nested_get(d:dict, key:int)->list[str]:
+def nested_get(d, key):
     res = []
     # base case - a dict with the wanted key
     if type(d.get(key,0)) == str : 
@@ -94,7 +94,7 @@ def distance(row1, col1, row2, col2):
     return abs(row1-row2) + abs(col1-col2)
 
 # 4b
-def add_tower(board:list[int], d:int, row:int, col:int):
+def add_tower(board, d, row, col):
     for _row,_col in enumerate(board[:row]):
         # print("distance :" + str(distance(row,_row,col,_col)))
         if distance(row,col,_row,_col) <= d :
@@ -103,7 +103,7 @@ def add_tower(board:list[int], d:int, row:int, col:int):
     return True
 
 
-def rec(board:list[int], d:int, i=0):
+def rec(board, d, i=0):
     n = len(board)
     if i == n-1 : 
         for j in range(n-1):
@@ -115,7 +115,7 @@ def rec(board:list[int], d:int, i=0):
 
 
 # 4c
-def n_towers(n:int,d:int)->list[int]:
+def n_towers(n,d):
     n_board= n*[0]
     if n>1 and d>=n**0.5 : 
         return []
