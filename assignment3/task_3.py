@@ -118,15 +118,17 @@ def add_tower(board, d, row, col):
     return True
 
 
-def rec(board: list[int], d: int, i=0):
+def rec(board, d: int, i=0, j=0):
     n = len(board)
     if i == n - 1:
-        for j in range(n - 1):
-            if add_tower(board, d, n - 1, j):
-                return True
-    for j in range(n):
-        if add_tower(board, d, i, j) and rec(board, d, i + 1):
+        if add_tower(board, d, i, j):
             return True
+    if j == n:
+        return False
+    if add_tower(board, d, i, j) and rec(board, d, i + 1):
+        return True
+    else:
+        return rec(board, d, i, j + 1)
 
 
 # 4c
