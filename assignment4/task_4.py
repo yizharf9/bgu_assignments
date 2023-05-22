@@ -239,6 +239,7 @@ class Cage:
     birds: list[Bird] = []
     space_left: int
     btype: str = "#"
+    coors : tuple[float,float]
 
     def __init__(self, ID: str, length: int, depth: int, height: int, color: str):
         self.ID = self.make_id()
@@ -264,7 +265,7 @@ class Cage:
         l = self.length
         d = self.depth
         h = self.height
-        print(f"total:{self.space_left},volume:{bird.volume}")
+        # print(f"total:{self.space_left},volume:{bird.volume}")
         cond = bird.volume <= self.space_left
 
         if self.btype != "#" and bird.btype != self.btype:
@@ -290,17 +291,125 @@ class Cage:
         l_cage = [
             int(self.length / 10) * self.btype for i in range(int(self.height / 10))
         ]
-        # for row in l_cage:
-        #     print(row)
         return l_cage
 
     def __str__(self):
         res = f"Cage ID: {self.ID}\nSize: {self.length,self.depth,self.height}\nColor: {self.color}\nNum of Birds: {self.get_num_of_birds()}\nBirds type: {self.btype}\n"
         return res
 
+    def show_cage(self):
+        for line in self.get_cage():
+            for j in line:
+                print(j,end=" ")
+            print()
+
     def make_id(self):
         rand = random.randint(0, 1000)
         return str(rand)
 
 
- 
+class Birdroom:
+    length: int
+    width: int
+    height: int
+    cages: list[Cage] = []
+    blueprint : list[list[str]] =[[]]
+
+    def __init__(self, length: float, width: float, height: float):
+        if 2 <= length <= 10 and 2 <= width <= 6 and 2 <= height <= 3:
+            self.length = int(length * 100)
+            self.width = int(width * 100)
+            self.height = int(height * 100)
+            # initiating a 2 dim list of the current room measurements
+            l = int((self.length)/10+2)
+            h = int((self.height)/10+2)
+            self.blueprint = [
+                    [self.set_def_bound(i,j,l,h) for j in range(l)] 
+                    for i in range(int(h))
+                ] 
+        else:
+            raise ValueError(
+                "invalid cage measurements!\nmake sure the of the following requirements:\n2 <= length <= 10\n2 <= width <= 6\n2 <= height <= 3"
+            )
+
+    def get_cages(self):
+        return self.cages
+
+    def get_birds(self):
+        res = []
+        for cage in self.cages:
+            res += cage.birds
+        return res
+
+    def get_strength(self):
+        res = 0
+        for bird in self.get_birds():
+            if type(bird) == Gouldianfinch:
+                res += bird.singing_strength
+            elif type(bird) == Budgerigar:
+                res += bird.tweet_strength
+        return res
+
+    def add_cage(self, cage:Cage, x: float, y: float):
+        if self.length < x*100 + cage.length or self.height < y*100 + cage.height or self.width < cage.depth:
+            raise ValueError("invalid placement for cage!\nexceeds room boundries")
+        # if self.check_cage_overlap(cage,x,y):
+        _cage = cage.get_cage()
+        for i,row in enumerate(_cage):
+            x_coor = i+int(x*10)+1
+            for j,char in enumerate(row):
+                y_coor = j+int(y*10)+1
+                self.blueprint[y_coor][x_coor] = char
+        self.cages.append(cage)
+        cage.coors = (x,y)
+        # else :
+        #     raise ValueError("invalid placement for cage!\noverlaping an existing cage")
+
+    def get_birdroom(self):
+        return self.blueprint
+    
+    # a method that is used in the init func to set boundries of the room
+    def set_def_bound(self,i,j,l,h):
+                if i == 0 or i == l - 1:
+                    return "-"
+                elif j == 0 or j == h - 1:
+                    return "|"
+                else:
+                    return "•"
+                #! change before submision 
+                    return " "
+
+    # a method that returns if a new cage can be placed in a given x,y coordinates within the room 
+    # by checking overlaping coors with all cages in the room  
+    def check_cage_overlap(self,added_cage:Cage,x:float,y:float):
+        l,h = added_cage.length,added_cage.height
+        X = x+l
+        Y = y+h
+        for existing_cage in self.cages:
+            print(existing_cage)
+            _l,_h = existing_cage.length,existing_cage.height
+            _x,_y = existing_cage.coors
+
+            _X = _x + _l
+            _Y = _y + _h
+            cond1 = _x<=x<=_X
+            cond2 = _y<=y<=_Y
+            cond3 = _x<=X<=_X
+            cond4 = _y<=Y<=_Y
+            if cond1 or cond2 or cond3 or cond4:
+                return False
+        return True
+    
+    def get_most_colorful(self):
+        pass
+
+    def show_room(self):
+        for line in self.get_birdroom():
+            for j in line:
+                print(j, end=" ")
+            print()
+    
+    def __str__(self):
+
+    
+        return f"{self.length}x{self.width}x{self.height} [cm^3]"
