@@ -120,6 +120,8 @@ class Parrot(Bird):
         age = self.get_age()
         i: int = int(age.find("Y"))
         n = int(age[:i])
+        if n < 3:
+            return None
         res = []
         for i in range(n):
             row = []
@@ -234,47 +236,71 @@ class Cage:
     depth: int
     height: int
     color: str
+    birds: list[Bird] = []
+    space_left: int
+    btype: str = "#"
 
     def __init__(self, ID: str, length: int, depth: int, height: int, color: str):
-        pass
+        self.ID = self.make_id()
 
-    def add_bird(self, bird):
-        pass
+        if 30 <= length <= 180 and 30 <= depth <= 60 and 40 <= height <= 180:
+            self.length = length
+            self.depth = depth
+            self.height = height
+            self.space_left = length * depth * height
+        else:
+            raise ValueError(
+                "invalid sizes for the cage!\nmake sure of the following:\n30<=length<=180\n30<=depth<=60\n40<=height<=180"
+            )
+        legal_colors = ["White", "Black", "Silver"]
+        if color in legal_colors:
+            self.color = color
+        else:
+            raise ValueError(
+                "invalid color for cage!\ncolor can be one of the following:\nWhite,Black,Silver"
+            )
+
+    def add_bird(self, bird: Bird):
+        l = self.length
+        d = self.depth
+        h = self.height
+        print(f"total:{self.space_left},volume:{bird.volume}")
+        cond = bird.volume <= self.space_left
+
+        if self.btype != "#" and bird.btype != self.btype:
+            raise TypeError(
+                f"cage can only hold 1 type of bird!\nthis cage holds ({self.btype}) type birds"
+            )
+        elif cond and self.btype == "#":
+            self.birds.append(bird)
+            self.btype = bird.btype
+            self.space_left -= bird.volume
+        elif cond:
+            self.birds.append(bird)
+            self.space_left -= bird.volume
+        return cond
 
     def get_birds(self):
-        pass
+        return self.birds
 
     def get_num_of_birds(self):
-        pass
+        return len(self.birds)
 
     def get_cage(self):
-        pass
+        l_cage = [
+            int(self.length / 10) * self.btype for i in range(int(self.height / 10))
+        ]
+        # for row in l_cage:
+        #     print(row)
+        return l_cage
 
     def __str__(self):
-        pass
+        res = f"Cage ID: {self.ID}\nSize: {self.length,self.depth,self.height}\nColor: {self.color}\nNum of Birds: {self.get_num_of_birds()}\nBirds type: {self.btype}\n"
+        return res
+
+    def make_id(self):
+        rand = random.randint(0, 1000)
+        return str(rand)
 
 
-class Birdroom:
-    def __init__(self, length: float, width: float, height: float):
-        pass
-
-    def get_cages(self):
-        pass
-
-    def get_birds(self):
-        pass
-
-    def get_strength(self):
-        pass
-
-    def add_cage(self, cage, x: float, y: float):
-        pass
-
-    def get_birdroom(self):
-        pass
-
-    def get_most_colorful(self):
-        pass
-
-    def __str__(self):
-        pass
+ 
