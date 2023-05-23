@@ -313,7 +313,7 @@ class Birdroom:
     width: int
     height: int
     cages: list[Cage] = []
-    blueprint : list[list[str]] =[[]]
+    blueprint: list[list[str]] = [[]]
 
     def __init__(self, length: float, width: float, height: float):
         if 2 <= length <= 10 and 2 <= width <= 6 and 2 <= height <= 3:
@@ -321,12 +321,12 @@ class Birdroom:
             self.width = int(width * 100)
             self.height = int(height * 100)
             # initiating a 2 dim list of the current room measurements
-            l = int((self.length)/10+2)
-            h = int((self.height)/10+2)
+            l = int((self.length) / 10 + 2)
+            h = int((self.height) / 10 + 2)
             self.blueprint = [
-                    [self.set_def_bound(i,j,l,h) for j in range(l)] 
-                    for i in range(int(h))
-                ] 
+                [self.set_def_bound(i, j, l, h) for j in range(l)]
+                for i in range(int(h))
+            ]
         else:
             raise ValueError(
                 "invalid cage measurements!\nmake sure the of the following requirements:\n2 <= length <= 10\n2 <= width <= 6\n2 <= height <= 3"
@@ -350,56 +350,72 @@ class Birdroom:
                 res += bird.tweet_strength
         return res
 
-    def add_cage(self, cage:Cage, x: float, y: float):
-        if self.length < x*100 + cage.length or self.height < y*100 + cage.height or self.width < cage.depth:
+    def add_cage(self, cage: Cage, x: float, y: float):
+        if (
+            self.length < x * 100 + cage.length
+            or self.height < y * 100 + cage.height
+            or self.width < cage.depth
+        ):
             raise ValueError("invalid placement for cage!\nexceeds room boundries")
-        # if self.check_cage_overlap(cage,x,y):
+        if self.check_cage_overlap(cage, x, y):
+            self.place_cage(cage, x, y)
+        else:
+            raise ValueError("invalid placement for cage!\noverlaping an existing cage")
+
+    def place_cage(self, cage: Cage, x: float, y: float):
         _cage = cage.get_cage()
-        for i,row in enumerate(_cage):
-            x_coor = i+int(x*10)+1
-            for j,char in enumerate(row):
-                y_coor = j+int(y*10)+1
+        for i, row in enumerate(_cage):
+            x_coor = i + int(x * 10) + 1
+            for j, char in enumerate(row):
+                y_coor = j + int(y * 10) + 1
                 self.blueprint[y_coor][x_coor] = char
         self.cages.append(cage)
-        cage.coors = (x,y)
-        # else :
-        #     raise ValueError("invalid placement for cage!\noverlaping an existing cage")
+        cage.coors = (x + 0.1, y + 0.1)
 
     def get_birdroom(self):
         return self.blueprint
-    
+
     # a method that is used in the init func to set boundries of the room
-    def set_def_bound(self,i,j,l,h):
-                if i == 0 or i == l - 1:
-                    return "-"
-                elif j == 0 or j == h - 1:
-                    return "|"
-                else:
-                    return "•"
-                #! change before submision 
-                    return " "
+    def set_def_bound(self, i, j, l, h):
+        if i == 0 or i == l - 1:
+            return "-"
+        elif j == 0 or j == h - 1:
+            return "|"
+        else:
+            return "•"
+            #! change before submision
+            return " "
 
-    # a method that returns if a new cage can be placed in a given x,y coordinates within the room 
-    # by checking overlaping coors with all cages in the room  
-    def check_cage_overlap(self,added_cage:Cage,x:float,y:float):
-        l,h = added_cage.length,added_cage.height
-        X = x+l
-        Y = y+h
+    # a method that returns if a new cage can be placed in a given x,y coordinates within the room
+    # by checking overlaping coors with all cages in the room
+    def check_cage_overlap(self, added_cage: Cage, x: float, y: float):
+        # adjusting measurments to match cage coordinates
+        l, h = int(added_cage.length / 10), int(added_cage.height / 10)
+        x, y = int(x * 10), int(y * 10)
+        # setting mores coors for the other corners of the added cage
+        X = x + l
+        Y = y + h
         for existing_cage in self.cages:
-            print(existing_cage)
-            _l,_h = existing_cage.length,existing_cage.height
-            _x,_y = existing_cage.coors
-
+            # adjusting measurments to match cage coordinates
+            _l, _h = int(existing_cage.length / 10), int(existing_cage.height / 10)
+            _x, _y = existing_cage.coors
+            _x, _y = int(_x * 10), int(_y * 10)
+            # setting mores coors for the other corners of the existing cage
             _X = _x + _l
             _Y = _y + _h
-            cond1 = _x<=x<=_X
-            cond2 = _y<=y<=_Y
-            cond3 = _x<=X<=_X
-            cond4 = _y<=Y<=_Y
-            if cond1 or cond2 or cond3 or cond4:
+
+            cond1 = _x <= x <= _X
+            cond2 = _y <= y <= _Y
+            cond3 = _x <= X <= _X
+            cond4 = _y <= Y <= _Y
+            # the following code reviews the prev conditions and "collects" all the True ones
+            # if at least 2 of the conds return True it means that at least one of the cages corners is within the current existing cage
+            # in other words ... the added cage is overlapping with at least one cage
+            total = cond1 + cond2 + cond3 + cond4
+            if total >= 2:
                 return False
         return True
-    
+
     def get_most_colorful(self):
         pass
 
@@ -408,8 +424,7 @@ class Birdroom:
             for j in line:
                 print(j, end=" ")
             print()
-    
-    def __str__(self):
 
-    
+    def __str__(self):
         return f"{self.length}x{self.width}x{self.height} [cm^3]"
+
