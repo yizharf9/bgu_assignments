@@ -407,7 +407,12 @@ class Birdroom:
         return self.blueprint
     
     def get_most_colorful(self):
-        pass
+        all_birds = self.get_birds()
+        most_colorful = all_birds[0]
+        for bird in all_birds:
+            if len(bird.colors) > len(most_colorful.colors):
+                most_colorful = bird
+        return most_colorful
 
     def get_strength(self):
         res = 0
