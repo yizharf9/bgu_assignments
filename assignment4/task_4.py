@@ -21,7 +21,7 @@ class Bird:
         self, ID: str, btype: str, birth: str, colors: list, foodtype: str, volume: int
     ) -> None:
         
-        # self.ID = self.make_id()
+        # self.ID = ID
         self.btype = btype
 
         # ? return the current datetime as birth if no alt is given
@@ -151,7 +151,7 @@ class Zebrafinch(Finch):
         if len(colors) == 0:
             raise ValueError("all birds must have at least 1 color!")
         self.btype = "Zebra Finch"
-        self.ID = self.make_id()
+        self.ID = ID
         Finch.__init__(self,self.ID, "Zebra Finch", birth, colors, volume=27000)
 
     def get_type(self):
@@ -181,7 +181,7 @@ class Gouldianfinch(Finch):
         if len(colors) == 0:
             raise ValueError("all birds must have at least 1 color!")
         self.btype = "Gouldian Finch"
-        self.ID = self.make_id()
+        self.ID = ID
         self.singing_strength = random.randrange(1, 11)
         Finch.__init__(self, self.ID, "Gouldian Finch", birth, colors, 96000)
 
@@ -208,7 +208,7 @@ class Budgerigar(Parrot):
             raise ValueError("all birds must have at least 1 color!")
         
         self.btype = "Budgerigar"
-        self.ID = self.make_id()
+        self.ID = ID
 
         self.tweet_strength = random.randrange(1, 11)
         Parrot.__init__(self, self.ID, "Budgerigar", birth, colors, 96000)
@@ -233,7 +233,7 @@ class Lovebird(Parrot):
         if len(colors) == 0:
             raise ValueError("all birds must have at least 1 color!")
         self.btype = "Lovebird"
-        self.ID = self.make_id()
+        self.ID = ID
         Parrot.__init__(self, self.ID , "L", birth, colors, 120_000)
 
     def get_type(self):
@@ -255,7 +255,7 @@ class Cage:
     coors: tuple
 
     def __init__(self, ID: str, length: int, depth: int, height: int, color: str):
-        self.ID = self.make_id()
+        self.ID = ID
 
         if 30 <= length <= 180 and 30 <= depth <= 60 and 40 <= height <= 180:
             self.length = length
@@ -264,11 +264,9 @@ class Cage:
             self.space_left = length * depth * height
             self.birds = []
         else:
-            # print("invalid")
-            pass
-            # raise ValueError(
-            #     "invalid sizes for the cage!\nmake sure of the following:\n30<=length<=180\n30<=depth<=60\n40<=height<=180"
-            # )
+            raise ValueError(
+                "invalid sizes for the cage!\nmake sure of the following:\n30<=length<=180\n30<=depth<=60\n40<=height<=180"
+            )
         legal_colors = ["White", "Black", "Silver"]
         if color in legal_colors:
             self.color = color
@@ -310,7 +308,7 @@ class Cage:
         return l_cage
 
     def __str__(self):
-        res = f"Cage ID: {self.ID}\nSize: {self.length,self.depth,self.height}\nColor: {self.color}\nNum of Birds: {self.get_num_of_birds()}\nBirds type:{self.btype}\n"
+        res = f"Cage ID: {self.ID}\nSize: {self.length,self.depth,self.height}\nColor: {self.color}\nNum of birds: {self.get_num_of_birds()}\nBirds type:{self.btype}"
         return res
 
     def show_cage(self):
@@ -354,27 +352,33 @@ class Birdroom:
         return self.cages
 
     def add_cage(self, cage: Cage, x: float, y: float):
+        
+        length_cond = 0 <= x * 100 + cage.length <= self.length and  0 <= x * 100 <= self.length
+        height_cond = 0 <= y * 100 + cage.height <= self.height
+        width_cond = cage.depth <= self.width
+
+        
         if (
-            self.length < x * 100 + cage.length
-            or self.height < y * 100 + cage.height
-            or self.width < cage.depth
+            # self.length < x * 100 + cage.length
+            # or self.height < y * 100 + cage.height
+            # or self.width < cage.depth
+            # and
+            not (length_cond and height_cond and width_cond)
         ):
-            # print("invalid")
-            pass
             # raise ValueError("invalid placement for cage!\nexceeds room boundries")
+            return False
         if self.check_cage_overlap(cage, x, y):
             self.place_cage(cage, x, y)
         else:
-            # print("invalid")
-            pass
             # raise ValueError("invalid placement for cage!\noverlaping an existing cage")
+            return False            
 
     def place_cage(self, cage: Cage, x: float, y: float):
         _cage = cage.get_cage()
         for i, row in enumerate(_cage):
-            x_coor = i + int(x * 10) + 1
+            x_coor = i + int(y * 10) + 1
             for j, char in enumerate(row):
-                y_coor = j + int(y * 10) + 1
+                y_coor = j + int(x * 10) + 1
                 self.blueprint[x_coor][y_coor] = char
         self.cages.append(cage)
 
