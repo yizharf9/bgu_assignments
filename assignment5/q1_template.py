@@ -37,24 +37,27 @@ def euler(f, a: float, b: float, initial_cond: float, N=None, h=None):
         if i < N:
             arr_y[i + 1] = y_i_1 + h * f(t_i_1, y_i_1)
             arr_t[i + 1] = t_i_1 + h
-        # print(y_i_1,y_i,t_i_1,h)
 
+    np.reshape(arr_t,(len(arr_t,)))
+    np.reshape(arr_y,(len(arr_y,)))
     return arr_t, arr_y
 
 
 def plot_funcs(t, y, y_exact):
     plt.figure()  # initialize new figure object
+    Y = y_exact(t)
+    y = np.array(y)
     t = np.linspace(t[0],t[-1],len(t))
-    y,y_exact = np.array(y), np.array(y_exact)
-    plt.plot(t,y)
-    plt.plot(t,y_exact)
+    plt.plot(t,y,linestyle = "dashed",color = "blue")
+    plt.plot(t,Y,color = "black")
+    
     fig = plt.gcf()  # get current figure, save in variable
     return fig
 
 
 def plot_error(t, y, y_exact):
     plt.figure()  # initialize new figure object
-    arr_error = abs(y-y_exact)
+    arr_error = abs(y-y_exact(t))
     print(arr_error)
     t = np.linspace(t[0],t[-1],len(t))
     plt.plot(t,arr_error)
@@ -71,10 +74,10 @@ if __name__ == "__main__":
     for t_i, y_i, ye_i in zip(t, y, sol_exact):
         print(f"{t_i:.2f}\t \t {y_i:.2f}\t \t{ye_i:.2f}\t \t {ye_i-y_i:.2f}")
 
-    fig1 = plot_funcs(t, y, y_exact=y_exact)
+    fig1 = plot_funcs(t, y, y_exact)
     # plt.show() # uncomment to see plot, but add comment back before submitting
     fig2 = plot_error(t, y, y_exact)
-    # plt.show() # uncomment to see plot, but add comment back before submitting
+    plt.show() # uncomment to see plot, but add comment back before submitting
 
     f = lambda t, y: np.cos(2 * t) + np.sin(3 * t)
     t, y = euler(f, 0, 1, 1, h=0.25)
