@@ -42,19 +42,24 @@ def euler(f, a: float, b: float, initial_cond: float, N=None, h=None):
     return arr_t, arr_y
 
 
-def plot_funcs(t, y, y_exact=None):
+def plot_funcs(t, y, y_exact):
     plt.figure()  # initialize new figure object
-    #  TODO : fill in your code here
+    t = np.linspace(t[0],t[-1],len(t))
+    y,y_exact = np.array(y), np.array(y_exact)
+    plt.plot(t,y)
+    plt.plot(t,y_exact)
     fig = plt.gcf()  # get current figure, save in variable
     return fig
 
 
 def plot_error(t, y, y_exact):
     plt.figure()  # initialize new figure object
-    #  TODO : fill in your code here
+    arr_error = abs(y-y_exact)
+    print(arr_error)
+    t = np.linspace(t[0],t[-1],len(t))
+    plt.plot(t,arr_error)
     fig = plt.gcf()  # get current figure, save in variable
     return fig
-
 
 if __name__ == "__main__":
     f = lambda t, y: y - t**2 + 1
