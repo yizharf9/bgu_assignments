@@ -37,6 +37,7 @@ def gaussian_blur(image: np.ndarray, g_ker: np.ndarray):
     for i, row in enumerate(image):
         for j, pixel in enumerate(row):
             m,n = g_ker.shape
+            # im_slice = np.resize(image[i:i+m,j:j+n],(m,n))
             im_slice = np.resize(image[i:i+m,j:j+n],(m,n))
             g_sum = np.array(g_ker*im_slice)
             image[i, j] = sum(sum(g_sum))
