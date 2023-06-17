@@ -26,9 +26,9 @@ def gaussian_kernel(
 
 # an aux function that returns the function of the gaussian kernel according to init conditions
 def gaussian(sig_x, sig_y, mu_x, mu_y):
-    C = 1 / (sig_x * sig_y * 2 * M.pi)
-    x_co = lambda x: (x - mu_x) ** 2 / (2 * sig_x)
-    y_co = lambda y: (y - mu_y) ** 2 / (2 * sig_y)
+    C = 1 / (sig_x * sig_y * (2 * M.pi)**0.5)
+    x_co = lambda x: ((x - mu_x) ** 2) / (2 * sig_x**2)
+    y_co = lambda y: ((y - mu_y) ** 2) / (2 * sig_y**2)
     g = lambda x, y: C * M.exp(-(x_co(x) + y_co(y)))
     return g
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     g_ker = gaussian_kernel(100, 50, mean_v=0, std_v=15, mean_h=-0, std_h=10)
     plt.imshow(g_ker, cmap="gray")
     plt.imsave("q2b.png", g_ker)
-    # plt.show()
+    plt.show()
 
     image_blur = gaussian_blur(image_grey, g_ker)
     plt.imshow(image_blur, cmap="gray")
