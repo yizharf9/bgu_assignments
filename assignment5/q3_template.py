@@ -53,7 +53,7 @@ def clean_data(data: np.ndarray):
     print(f"Current data type:{data.dtype}")
     #
     # Task 3: Convert the array to floats so we can work with it.
-    data = data.astype("float")  
+    data = data.astype("float")
     # print the data type again so we can be sure that the conversion worked:
     print(f"Converted data type:{data.dtype}")
     #
@@ -74,39 +74,29 @@ def get_unique_categories(array: np.ndarray) -> int:
     Prints the number of unique values (categories) in an array.
     Returns the number of unique values (categories).
     """
-    array = np.array([])
-    with open("./nci_labels.txt","r") as f:
-        meta_data = f.read().split("\n")
-        temp = list(d.strip() for d in meta_data)
-        data_set = []
-        for obj in temp:
-            if obj not in data_set:
-                data_set.append(obj)
-        array = data_set
-        print(array)
+    array = np.unique(array)
+    # print(array)
+    # print(len(array))
     return len(array)
 
 
 def by_clust_num(
     predictions: np.ndarray, actual: Union[List, np.ndarray]
 ) -> Dict[int, List]:
-    """
-    Parameters
-    ----------
-    predictions : TYPE List[int]
-        DESCRIPTION. List of cluster numbers assigned to observations by
-        clustering algorithm prediction.
-    actual : TYPE List
-    DESCRIPTION. List of actual (ground truth) labels of observations.
+    # print(f"predictions:\n{predictions}")
 
-    Returns
-    -------
-    by_clust: TYPE Dict[int, List]
-        DESCRIPTION. A dictionary where the keys are the cluster number
-        the values are a list with the actual labels of the observations
-        assigned to each cluster.
-    """
-    pass  # TODO : fill in your code
+    # initilizing a dic with 14 keys of lists to store the predictions
+    dic = {i: [] for i in range(14)}
+
+    for i, label in enumerate(actual):
+        if dic.get(predictions[i],0) == 0:
+            dic[predictions[i]] = []
+        dic[predictions[i]].append(label)
+
+    # for key,val in dic.items():
+    #     print(f"{key}:{val}\n")
+
+    return dic
 
 
 def by_label(
@@ -115,6 +105,17 @@ def by_label(
     num_clusters=1,
     zero_index=True,
 ) -> Dict[str, List[int]]:
+    labels = np.unique(actual)
+    dic = {label: np.zeros((14,)).astype("int") for label in labels}
+    # print(f"dic:\n{dic}\n")
+    for i, actual_label in enumerate(actual):
+        # print(actual_label, predictions[i])
+        dic[actual_label][predictions[i]] += 1
+    # print()
+    # for key,val in dic.items():
+    #     print(key,val)
+
+    return dic
     """
     Parameters
     ----------
@@ -137,15 +138,26 @@ def by_label(
         The value in the i^th position is the number of observations
         classified to the i^th cluster.
     """
-    pass  # TODO : fill in your code
+
+
+def rescale_data(data: np.ndarray):
+    # aquiring the standard deviation from each gene
+    m = data.shape[0]
+    # std_deviation = np.array([np.std(data, 0)] * m)
+    std_deviation = np.std(data, 0)
+    # columns_min = np.array([data.mean(0)] * m)
+    new_data = np.array(data  / (std_deviation))
+    return new_data
 
 
 def plot_dendrogram(Z, labels=None, title=None, ylabel=None, xlabel=None):
-    """
-    Create a dendrogram plot, return as figure.
-    """
+    # print(labels)
     plt.figure()  # initialize new figure object
-    # TODO : complete your code here
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    shc.dendrogram(Z,leaf_rotation=90,labels=labels)
     fig = plt.gcf()  # get current figure, save in variable
     return fig
 
@@ -174,7 +186,10 @@ def threshold(Z, num_clusters=2):
         between num_clusters and num_clusters + 1.
 
     """
-    pass  # TODO : fill in your code
+    merge_heights = Z[:,2]
+    avg = (merge_heights[-num_clusters] + merge_heights[-(num_clusters-1)])/2
+    return avg
+
 
 
 def n_most_frequent(list, n):
@@ -215,48 +230,34 @@ def main():
     # Read the labels for each sample into a numpy array:
     path_to_labels = "nci_labels.txt"
     labels = import_to_numpy(path_to_labels)
-    # Exploring the data set: what is the size of our data?
     # print(df.shape) #?
-    # View the column names:
-    # Here we see that each column is a biological sample, labelled
-    # 's1', 's2'... 's64'
     # print(df.columns) #?
-    # Now we want to see the row names.
-    # Here we can examine the first 10 rows of the data set. The rows are the
-    # levels of gene expression for each sample.
     # print(df.head(10)) #?
-    # Read the data frame into an array.
-    # The conversion to a np array removes the column names.
     data = df.to_numpy()
     #
     # Tasks 1 - 4: complete the function to return cleaned data.
     data = clean_data(data)  # TODO
+    df = pd.DataFrame(data)
+    print(df)  # ?
     #
     # First, let's count the number of different types of tumors according to
     # the labels. This will be the number of clusters we'll use to categorize
     # the data.
     # Task 5: fill in the function.
-    num_clusters = get_unique_categories(labels)  # TODO: complete the function.
-    print(num_clusters) #?
-    #
-    # Let's start by clustering the data using K-means.
-    # To perform K-means clustering, we'll use the methods provided in the
-    # scikit learn module, whose documentation is available here:
-    # https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans
-    # Notice that in scikit-learn, Kmeans is a class that instantiates an
-    # object. The object of type 'Kmeans' can perform k-means clustering on
-    # data that is passed to it.
+    num_clusters = get_unique_categories(labels)
+    # print(num_clusters) #?
     #
     # Task 6: Initialize a kmeans object and use it to categorize the data.
     # Provide the following arguments to initialize the Kmeans object:
     # n_clusters = the number of different tumor types (num_clusters)
     # random_state=10 (This is important to ensure that your results match the
     # automated tests in the VPL.)
-    kmeans = KMeans(num_clusters,random_state=10).predict()
+    kmeans = KMeans(num_clusters, random_state=10).fit(data)
     #
     # Task 7: Use of the method 'predict' in the Kmeans class to  get the
     # cluster number for each observation.
-    predictions = None  # TODO : Replace None with correct assignment or function call
+    predictions = kmeans.predict(X=data)
+    print(predictions[:20])
     #
     # An ideal clustering would put each tumor type in exactly one cluster. To
     # see how well the clustering works, define a dictionary where the keys are
@@ -267,7 +268,7 @@ def main():
     # by_clust_km[3]=['MELANOMA', 'MELANOMA', 'LEUKEMIA']
     #
     # Task 8: complete the function to fill in the dictionary:
-    by_clust_km = by_clust_num(predictions, labels)  # TODO
+    by_clust_km = by_clust_num(predictions, labels)
     #
     # Alternatively, we might want to view the results by cancer type: for each cancer
     # type, we'll want to see which clusters it lands in. For this, define a dictionary
@@ -291,16 +292,16 @@ def main():
     # samples so that they all fall into a comparable range.
     #
     # Task 10: complete the assignment to rescale the data:
-    data_rescale = None  # TODO : Replace None with correct assignment or function call
+    data_rescale = rescale_data(data)
+    print(data_rescale)
     #
     # Task 11:
     # Repeat the clustering on the rescaled data, and enter the results in a
     # dictionary by cluster number and in a dictionary by tumor type, as in the
     # previous step.
-    kmeans_rs = None  # TODO : Replace None with correct assignment or function call
-    predictions_rs = (
-        None  # TODO : Replace None with correct assignment or function call
-    )
+    kmeans_rs = KMeans(n_clusters=num_clusters, random_state=10).fit(data_rescale)
+    predictions_rs = kmeans_rs.predict(X=data_rescale)
+
     by_clust_km_rs = by_clust_num(predictions_rs, labels)  # TODO
     by_cancer_km_rs = by_label(
         labels, predictions_rs, num_clusters=num_clusters
@@ -316,7 +317,7 @@ def main():
     #
     # Task 12: fill in the command to assign the linkage matrix to the variable
     # clusters below:
-    clusters = None  # TODO : Replace None with correct assignment or function call
+    clusters = shc.linkage(data,metric="euclidean",method="ward",)  # TODO : Replace None with correct assignment or function call
     #
     # Use the method 'dendrogram' to
     # plot the results. Include the labels of the cancer types at the leaf of the tree.
@@ -328,7 +329,8 @@ def main():
         title="Hierarchical Clustering of Gene Expression \n From NCI Samples",
         xlabel="observations",
         ylabel="distance",
-    )  # TODO : complete function
+    )
+    
     # plt.show() # uncomment to see plot, but add comment back before submitting
     #
     # Use the linkage matrix to find the threshold. i.e., the height of the
@@ -341,6 +343,7 @@ def main():
     #
     # Task 13: complete the function:
     thresh = threshold(clusters, num_clusters)  # TODO
+    print(thresh)
     #
     # Task 14: Add a horizontal line to the dendrogram graph at the height that
     # will result in the same number of clusters used previously in the kmeans
@@ -349,14 +352,22 @@ def main():
     # To see the result clearly, use a line width of 0.5.
     # Store the result in the variable fig2 below.
     #
-    fig2 = None  # TODO: replace None with correct assignment or function call
+    fig2 = plot_dendrogram(
+        clusters,
+        labels=labels,
+        title="Hierarchical Clustering of Gene Expression \n From NCI Samples",
+        xlabel="observations",
+        ylabel="distance",
+    )
+    plt.axhline(thresh).set_linewidth(0.5)
     # plt.show() # uncomment to see plot, but add comment back before submitting
     #
     # Task 15: Use 'fcluster' to attach the cluster ID number
     # (integers from 1 to the number of clusters) to each observation.
-    # Use the argment criterion='distance'.
-    #
-    predictions_hc = None  # TODO: replace None with correct assignment or function call
+    # Use the argument criterion='distance'.
+    x = shc.fcluster(Z=clusters,t=1,criterion="distance")
+    predictions_hc = np.array([i-1 for i in x])  # TODO: replace None with correct assignment or function call
+    print(predictions_hc)
     #
     # (Note that unlike the method 'predict' in the Kmeans class,  'fcluster'
     # returns cluster numbers starting from 1, not from 0.)
