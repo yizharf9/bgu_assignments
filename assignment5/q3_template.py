@@ -75,27 +75,21 @@ def get_unique_categories(array: np.ndarray) -> int:
     Returns the number of unique values (categories).
     """
     array = np.unique(array)
-    # print(array)
-    # print(len(array))
     return len(array)
 
 
 def by_clust_num(
     predictions: np.ndarray, actual: Union[List, np.ndarray]
 ) -> Dict[int, List]:
-    # print(f"predictions:\n{predictions}")
-
     # initilizing a dic with 14 keys of lists to store the predictions
     dic = {i: [] for i in range(14)}
 
     for i, label in enumerate(actual):
-        if dic.get(predictions[i],0) == 0:
+        # print(i,label)
+        if dic.get(predictions[i], 0) == 0:
             dic[predictions[i]] = []
+            dic[predictions[i]].append(label)
         dic[predictions[i]].append(label)
-
-    # for key,val in dic.items():
-    #     print(f"{key}:{val}\n")
-
     return dic
 
 
@@ -107,13 +101,8 @@ def by_label(
 ) -> Dict[str, List[int]]:
     labels = np.unique(actual)
     dic = {label: np.zeros((14,)).astype("int") for label in labels}
-    # print(f"dic:\n{dic}\n")
     for i, actual_label in enumerate(actual):
-        # print(actual_label, predictions[i])
         dic[actual_label][predictions[i]] += 1
-    # print()
-    # for key,val in dic.items():
-    #     print(key,val)
 
     return dic
     """
@@ -146,18 +135,17 @@ def rescale_data(data: np.ndarray):
     # std_deviation = np.array([np.std(data, 0)] * m)
     std_deviation = np.std(data, 0)
     # columns_min = np.array([data.mean(0)] * m)
-    new_data = np.array(data  / (std_deviation))
+    new_data = np.array(data / (std_deviation))
     return new_data
 
 
 def plot_dendrogram(Z, labels=None, title=None, ylabel=None, xlabel=None):
-    # print(labels)
     plt.figure()  # initialize new figure object
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
 
-    shc.dendrogram(Z,leaf_rotation=90,labels=labels)
+    shc.dendrogram(Z, leaf_rotation=90, labels=labels)
     fig = plt.gcf()  # get current figure, save in variable
     return fig
 
@@ -186,18 +174,24 @@ def threshold(Z, num_clusters=2):
         between num_clusters and num_clusters + 1.
 
     """
-    merge_heights = Z[:,2]
-    avg = (merge_heights[-num_clusters] + merge_heights[-(num_clusters-1)])/2
+    merge_heights = Z[:, 2]
+    avg = (merge_heights[-num_clusters] + merge_heights[-(num_clusters - 1)]) / 2
     return avg
 
 
-
-def n_most_frequent(list, n):
+def n_most_frequent(list:list, n):
     """
     Return a list of n most frequent values in list, sorted from highest
     frequency to lowest.
     """
-    pass  # TODO : fill in your code
+    freq_dic = {}
+    for cancer in list:
+        if freq_dic.get(cancer,0) == 0:
+            freq_dic[cancer] = 0 
+        freq_dic[cancer] +=1 
+    sorted_dic = sorted((freq_dic.items()),key=lambda x: x[1],reverse=True)
+    top_n = [x[0] for x in  sorted_dic[:n]]
+    return top_n
 
 
 def clustering_success_check(Z, labels, n):
@@ -219,7 +213,25 @@ def clustering_success_check(Z, labels, n):
                         frequent types of observations. Success = True,
                         Failure = False.
     """
-    pass  # TODO : fill in your code
+    n_most_freq = n_most_frequent(labels,n)
+    print(n_most_freq)
+    predictions = shc.fcluster(Z=Z,t=threshold(Z,n),criterion="distance")
+    predictions = [(labels[i],predictions[i]) for i in range(len(labels))]
+    successes = []
+    for one in n_most_freq:
+        successes.append(success(one,predictions))
+    return successes
+
+def success(label:str,predictions:list[tuple[str,int]])->bool:
+    possible_clusters = set()
+    for prediction in predictions:
+        if prediction[0] == label:
+            possible_clusters.add(prediction[1])
+    if len(possible_clusters)>1:
+        print(possible_clusters)
+        print(f"Clustering unsuccessful for {label}")
+        return False
+    return True
 
 
 def main():
@@ -230,22 +242,16 @@ def main():
     # Read the labels for each sample into a numpy array:
     path_to_labels = "nci_labels.txt"
     labels = import_to_numpy(path_to_labels)
-    # print(df.shape) #?
-    # print(df.columns) #?
-    # print(df.head(10)) #?
     data = df.to_numpy()
     #
     # Tasks 1 - 4: complete the function to return cleaned data.
     data = clean_data(data)  # TODO
-    df = pd.DataFrame(data)
-    print(df)  # ?
     #
     # First, let's count the number of different types of tumors according to
     # the labels. This will be the number of clusters we'll use to categorize
     # the data.
     # Task 5: fill in the function.
     num_clusters = get_unique_categories(labels)
-    # print(num_clusters) #?
     #
     # Task 6: Initialize a kmeans object and use it to categorize the data.
     # Provide the following arguments to initialize the Kmeans object:
@@ -257,7 +263,6 @@ def main():
     # Task 7: Use of the method 'predict' in the Kmeans class to  get the
     # cluster number for each observation.
     predictions = kmeans.predict(X=data)
-    print(predictions[:20])
     #
     # An ideal clustering would put each tumor type in exactly one cluster. To
     # see how well the clustering works, define a dictionary where the keys are
@@ -293,7 +298,9 @@ def main():
     #
     # Task 10: complete the assignment to rescale the data:
     data_rescale = rescale_data(data)
-    print(data_rescale)
+    df = pd.DataFrame(data_rescale)
+    print(df)  # ?
+
     #
     # Task 11:
     # Repeat the clustering on the rescaled data, and enter the results in a
@@ -317,7 +324,7 @@ def main():
     #
     # Task 12: fill in the command to assign the linkage matrix to the variable
     # clusters below:
-    clusters = shc.linkage(data,metric="euclidean",method="ward",)  # TODO : Replace None with correct assignment or function call
+    clusters = shc.linkage(data, metric="euclidean", method="ward")
     #
     # Use the method 'dendrogram' to
     # plot the results. Include the labels of the cancer types at the leaf of the tree.
@@ -330,7 +337,7 @@ def main():
         xlabel="observations",
         ylabel="distance",
     )
-    
+
     # plt.show() # uncomment to see plot, but add comment back before submitting
     #
     # Use the linkage matrix to find the threshold. i.e., the height of the
@@ -342,8 +349,7 @@ def main():
     # three clusters is in the row before the last, etc.
     #
     # Task 13: complete the function:
-    thresh = threshold(clusters, num_clusters)  # TODO
-    print(thresh)
+    thresh = threshold(clusters, num_clusters)
     #
     # Task 14: Add a horizontal line to the dendrogram graph at the height that
     # will result in the same number of clusters used previously in the kmeans
@@ -365,19 +371,24 @@ def main():
     # Task 15: Use 'fcluster' to attach the cluster ID number
     # (integers from 1 to the number of clusters) to each observation.
     # Use the argument criterion='distance'.
-    x = shc.fcluster(Z=clusters,t=1,criterion="distance")
-    predictions_hc = np.array([i-1 for i in x])  # TODO: replace None with correct assignment or function call
-    print(predictions_hc)
+    x = shc.fcluster(Z=clusters, t=thresh, criterion="distance")
+    predictions_hc = np.array([i - 1 for i in x])
     #
     # (Note that unlike the method 'predict' in the Kmeans class,  'fcluster'
     # returns cluster numbers starting from 1, not from 0.)
     # Store the results in two dictionaries, as you did for the results of
     # kmeans: one with cluster numbers as keys and one with tumor labels as
     # keys.
-    by_clust_hc = by_clust_num(predictions_hc, labels)  # TODO : complete function
+    by_clust_hc = by_clust_num(predictions_hc, labels)
+
+    # for key,val in by_clust_hc.items():
+    #     print(f"key:{key}\n{val}")
+
     by_cancer_hc = by_label(
         labels, predictions_hc, num_clusters=num_clusters, zero_index=False
-    )  # TODO : complete function
+    )
+    # for key, val in by_cancer_hc.items():
+    #     print(f"key:{key}\n{val}")
     #
     # Task 16: We can see that our data contains more samples from some cancer
     # types than others. Return a list with the names of the 5 most common
@@ -395,7 +406,8 @@ def main():
     # in a boolean list of length N (success = True, failure = False)
     successes = clustering_success_check(
         clusters, labels, 5
-    )  # TODO : complete function
+    )  
+    print(successes)
 
     return (
         labels,

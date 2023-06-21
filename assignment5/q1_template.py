@@ -16,10 +16,10 @@ def euler(f, a: float, b: float, initial_cond: float, N=None, h=None):
         raise ValueError(
             f"make sure the parameters h and N are mathcing by value \n expected val for h:{h} , val for h:{(b-a)/N}"
         )
-    elif N != None:
+    elif N != None and h == None :
         h = (b - a) / N
-    elif h != None:
-        N = int((b - a) / h)
+    elif h != None and N == None :
+        N = (b - a) / h
 
     # arrays to keep data
     arr_t = np.zeros(N + 1)
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     fig1 = plot_funcs(t, y, y_exact)
     # plt.show() # uncomment to see plot, but add comment back before submitting
     fig2 = plot_error(t, y, y_exact)
-    plt.show() # uncomment to see plot, but add comment back before submitting
+    # plt.show() # uncomment to see plot, but add comment back before submitting
 
     f = lambda t, y: np.cos(2 * t) + np.sin(3 * t)
     t, y = euler(f, 0, 1, 1, h=0.25)
