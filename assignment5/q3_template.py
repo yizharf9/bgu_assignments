@@ -20,7 +20,7 @@ import pandas as pd
 import numpy as np
 import scipy.cluster.hierarchy as shc
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from typing import Dict, List, Union
 
 
@@ -99,10 +99,16 @@ def by_label(
     num_clusters=1,
     zero_index=True,
 ) -> Dict[str, List[int]]:
+    
     labels = np.unique(actual)
-    dic = {label: np.zeros((14,)).astype("int") for label in labels}
+    print(actual)
+    print(predictions)
+    dic = {label: [0]*num_clusters for label in labels}
+    addition = 1 if not zero_index else 0
+
     for i, actual_label in enumerate(actual):
-        dic[actual_label][predictions[i]] += 1
+        index = predictions[i] - addition
+        dic[actual_label][index] += 1
 
     return dic
     """
@@ -214,7 +220,6 @@ def clustering_success_check(Z, labels, n):
                         Failure = False.
     """
     n_most_freq = n_most_frequent(labels,n)
-    print(n_most_freq)
     predictions = shc.fcluster(Z=Z,t=threshold(Z,n),criterion="distance")
     predictions = [(labels[i],predictions[i]) for i in range(len(labels))]
     successes = []
@@ -222,14 +227,14 @@ def clustering_success_check(Z, labels, n):
         successes.append(success(one,predictions))
     return successes
 
-def success(label:str,predictions:list[tuple[str,int]])->bool:
+def success(label,predictions):
     possible_clusters = set()
     for prediction in predictions:
         if prediction[0] == label:
             possible_clusters.add(prediction[1])
     if len(possible_clusters)>1:
-        print(possible_clusters)
-        print(f"Clustering unsuccessful for {label}")
+        # print(possible_clusters)
+        # print(f"Clustering unsuccessful for {label}")
         return False
     return True
 
@@ -258,11 +263,12 @@ def main():
     # n_clusters = the number of different tumor types (num_clusters)
     # random_state=10 (This is important to ensure that your results match the
     # automated tests in the VPL.)
-    kmeans = KMeans(num_clusters, random_state=10).fit(data)
+    kmeans = KMeans(n_clusters=num_clusters, random_state=10).fit(data)
     #
     # Task 7: Use of the method 'predict' in the Kmeans class to  get the
     # cluster number for each observation.
     predictions = kmeans.predict(X=data)
+    print(predictions)
     #
     # An ideal clustering would put each tumor type in exactly one cluster. To
     # see how well the clustering works, define a dictionary where the keys are
@@ -285,7 +291,8 @@ def main():
     # by_cancer_km['MELANOMA'] = [4, 0, 0, 0, 2, 0, 0 ...]
     #
     # Task 9: Compelete the function to fill in the dictionary:
-    by_cancer_km = by_label(labels, predictions, num_clusters=num_clusters)  # TODO
+    by_cancer_km = by_label(labels, predictions, num_clusters=num_clusters)
+    # by_cancer_km = np.array([sum(val) for val in by_cancer_km.values()])
     #
     # One of the problems with the data we are working with is that each gene can
     # produce measurements in a different range of numbers. For example, the values
@@ -299,7 +306,7 @@ def main():
     # Task 10: complete the assignment to rescale the data:
     data_rescale = rescale_data(data)
     df = pd.DataFrame(data_rescale)
-    print(df)  # ?
+    # print(df)  # ?
 
     #
     # Task 11:
@@ -380,16 +387,9 @@ def main():
     # kmeans: one with cluster numbers as keys and one with tumor labels as
     # keys.
     by_clust_hc = by_clust_num(predictions_hc, labels)
-
-    # for key,val in by_clust_hc.items():
-    #     print(f"key:{key}\n{val}")
-
     by_cancer_hc = by_label(
         labels, predictions_hc, num_clusters=num_clusters, zero_index=False
     )
-    # for key, val in by_cancer_hc.items():
-    #     print(f"key:{key}\n{val}")
-    #
     # Task 16: We can see that our data contains more samples from some cancer
     # types than others. Return a list with the names of the 5 most common
     # cancer types in the data, sorted from highest frequency to lowest
@@ -407,7 +407,6 @@ def main():
     successes = clustering_success_check(
         clusters, labels, 5
     )  
-    print(successes)
 
     return (
         labels,

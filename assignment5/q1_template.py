@@ -18,8 +18,9 @@ def euler(f, a: float, b: float, initial_cond: float, N=None, h=None):
         )
     elif N != None and h == None :
         h = (b - a) / N
-    elif h != None and N == None :
-        N = (b - a) / h
+    elif h != None and N == None and int((b - a) / h) == (b - a) / h :
+        N = int((b - a) / h)
+        
 
     # arrays to keep data
     arr_t = np.zeros(N + 1)
@@ -42,6 +43,40 @@ def euler(f, a: float, b: float, initial_cond: float, N=None, h=None):
     np.reshape(arr_y,(len(arr_y,)))
     return arr_t, arr_y
 
+def euler(f, a: float, b: float, initial_cond: float, N=None, h=None):
+    # input checking block
+    if N == None and h == None:
+        raise ValueError("please fill at least one of the required areas: N, h")
+    elif N != None and h != None and (b - a) / N != h:
+        raise ValueError(
+            f"make sure the parameters h and N are mathcing by value \n expected val for h:{h} , val for h:{(b-a)/N}"
+        )
+    elif N != None and h == None :
+        h = (b - a) / N
+    elif h != None and N == None and int((b - a) / h) == (b - a) / h :
+        N = int((b - a) / h)
+        
+
+    # arrays to keep data
+    arr_t = np.zeros(N + 1)
+    arr_y = np.zeros(N + 1)
+
+    # setting values of array
+    arr_y[0] = initial_cond
+    arr_t[0] = a
+
+    for i in range(N):
+        t_i_1 = arr_t[i]
+        y_i_1 = arr_y[i]
+
+        arr_t[i] = t_i_1
+        if i < N:
+            arr_y[i + 1] = y_i_1 + h * f(t_i_1, y_i_1)
+            arr_t[i + 1] = t_i_1 + h
+
+    np.reshape(arr_t,(len(arr_t,)))
+    np.reshape(arr_y,(len(arr_y,)))
+    return arr_t, arr_y
 
 def plot_funcs(t, y, y_exact):
     plt.figure()  # initialize new figure object
@@ -64,7 +99,7 @@ def plot_error(t, y, y_exact):
     fig = plt.gcf()  # get current figure, save in variable
     return fig
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     f = lambda t, y: y - t**2 + 1
     t, y = euler(f, 0, 2, 0.5, N=10)
     y_exact = lambda t: (t + 1) ** 2 - 0.5 * np.exp(t)

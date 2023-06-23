@@ -5,8 +5,7 @@ Fundamentals of CS for EE students 2023
 """
 
 import numpy as np
-from matplotlib import pyplot as plt
-import math as M
+# from matplotlib import pyplot as plt
 from skimage import data
 from skimage.color import rgb2gray
 
@@ -26,10 +25,10 @@ def gaussian_kernel(
 
 # an aux function that returns the function of the gaussian kernel according to init conditions
 def gaussian(sig_x, sig_y, mu_x, mu_y):
-    C = 1 / (sig_x * sig_y * (2 * M.pi) ** 0.5)
+    C = 1 / (sig_x * sig_y * 2 * np.pi)
     x_co = lambda x: ((x - mu_x) ** 2) / (2 * sig_x**2)
     y_co = lambda y: ((y - mu_y) ** 2) / (2 * sig_y**2)
-    g = lambda x, y: C * M.exp(-(x_co(x) + y_co(y)))
+    g = lambda x, y: C * np.exp(-(x_co(x) + y_co(y)))
     return g
 
 
@@ -37,13 +36,13 @@ def gaussian_blur(image: np.ndarray, g_ker: np.ndarray):
     m, n = g_ker.shape
     x, y = image.shape
     for i, row in enumerate(image):
-        for j in row:
+        for j in range(len(row)):
             im_slice = np.zeros((m, n))
             exceeds_x = i + m > x
             exceeds_y = j + n > y
 
-            end_x = m if not exceeds_x else x - i
-            end_y = n if not exceeds_y else y - j
+            end_x = int(m) if not exceeds_x else int(x - i)
+            end_y = int(n) if not exceeds_y else int(y - j)
 
             im_slice[:end_x, :end_y] = image[i : i + end_x, j : j + end_y]
 
@@ -63,7 +62,7 @@ if __name__ == "__main__":
     g_ker = gaussian_kernel(100, 50, mean_v=0, std_v=15, mean_h=-0, std_h=10)
     plt.imshow(g_ker, cmap="gray")
     plt.imsave("q2b.png", g_ker)
-    plt.show()
+    # plt.show()
 
     image_blur = gaussian_blur(image_grey, g_ker)
     plt.imshow(image_blur, cmap="gray")
