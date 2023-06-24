@@ -83,15 +83,9 @@ def get_unique_categories(array: np.ndarray) -> int:
 def by_clust_num(
     predictions: np.ndarray, actual: Union[List, np.ndarray]
 ) -> Dict[int, List]:
-    # initilizing a dic with 14 keys of lists to store the predictions
-    num_clusters = len(np.unique(predictions))
-
-    dic = {i: [] for i in range(num_clusters)}
-
+    # num_clusters = len(np.unique(predictions)) #! this is how its supposed to be!!!
+    dic = {i: [] for i in np.unique(predictions)}
     for i, label in enumerate(actual):
-        # print(i,label)
-        if dic.get(predictions[i], 0) == 0:
-            dic[predictions[i]] = []
         dic[predictions[i]].append(label)
     return dic
 
