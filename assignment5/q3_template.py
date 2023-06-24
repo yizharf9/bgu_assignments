@@ -75,6 +75,8 @@ def get_unique_categories(array: np.ndarray) -> int:
     Returns the number of unique values (categories).
     """
     array = np.unique(array)
+    print(array)
+    print(len(array))
     return len(array)
 
 
@@ -82,13 +84,14 @@ def by_clust_num(
     predictions: np.ndarray, actual: Union[List, np.ndarray]
 ) -> Dict[int, List]:
     # initilizing a dic with 14 keys of lists to store the predictions
-    dic = {i: [] for i in range(14)}
+    num_clusters = len(np.unique(predictions))
+
+    dic = {i: [] for i in range(num_clusters)}
 
     for i, label in enumerate(actual):
         # print(i,label)
         if dic.get(predictions[i], 0) == 0:
             dic[predictions[i]] = []
-            dic[predictions[i]].append(label)
         dic[predictions[i]].append(label)
     return dic
 
@@ -101,8 +104,6 @@ def by_label(
 ) -> Dict[str, List[int]]:
     
     labels = np.unique(actual)
-    print(actual)
-    print(predictions)
     dic = {label: [0]*num_clusters for label in labels}
     addition = 1 if not zero_index else 0
 

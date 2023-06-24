@@ -18,7 +18,7 @@ def gaussian_kernel(
     mean_h: float = 0,
     std_h: float = None,
 ) -> np.ndarray:
-    g = gaussian(std_v, std_h, mean_v + int(row / 2), mean_h + int(col / 2))
+    g = gaussian(std_v,std_h, mean_v + int(row / 2), mean_h + int(col / 2))
     out = np.array(list([g(i, j) for j in range(col)] for i in range(row)))
     return out
 
@@ -35,33 +35,27 @@ def gaussian(sig_x, sig_y, mu_x, mu_y):
 def gaussian_blur(image: np.ndarray, g_ker: np.ndarray):
     m, n = g_ker.shape
     x, y = image.shape
-    for i, row in enumerate(image):
-        for j in range(len(row)):
-            im_slice = np.zeros((m, n))
-            exceeds_x = i + m > x
-            exceeds_y = j + n > y
-
-            end_x = int(m) if not exceeds_x else int(x - i)
-            end_y = int(n) if not exceeds_y else int(y - j)
-
-            im_slice[:end_x, :end_y] = image[i : i + end_x, j : j + end_y]
-
+    image = np.pad(image,((0,m),(0,n)),constant_values=(0))
+    new_image = np.zeros((x,y))
+    for i in range(x):
+        for j in range(y):
+            im_slice = image[i:i+m, j:j+n]
             g_sum = np.array(g_ker * im_slice)
-            image[i, j] = sum(sum(g_sum))
-    return image
+            new_image[i, j] = np.sum(g_sum)
+    return new_image
 
 
 if __name__ == "__main__":
     image = data.astronaut()
     image_grey = rgb2gray(image)  # converts color images to black-and-white
-    plt.imshow(image)
-    plt.imshow(image_grey, cmap="gray")
-    plt.imsave("q2a.png", image_grey)
+    # plt.imshow(image)
+    # plt.imshow(image_grey, cmap="gray")
+    # plt.imsave("q2a.png", image_grey)
     # plt.show()
 
     g_ker = gaussian_kernel(100, 50, mean_v=0, std_v=15, mean_h=-0, std_h=10)
-    plt.imshow(g_ker, cmap="gray")
-    plt.imsave("q2b.png", g_ker)
+    # plt.imshow(g_ker, cmap="gray")
+    # plt.imsave("q2b.png", g_ker)
     # plt.show()
 
     image_blur = gaussian_blur(image_grey, g_ker)
